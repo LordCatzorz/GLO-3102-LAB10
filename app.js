@@ -18,8 +18,6 @@ const Task = require('./task.js').model;
 const port = process.env.PORT || 8080;
 const app = express();
 
-const userTasks = {};
-
 app.use(bodyParser.json());
 app.use(cors(corsOptions));
 
@@ -151,30 +149,3 @@ function ensureUserExist(userId, res, callback) {
         }
     });
 }
-
-function editTasks(userId, taskId, res, functionToPerform, callback) {
-    const tasks = getUserTasks(userId);
-
-    var existingTask = undefined;
-    var taskIndex = -1;
-
-    tasks.forEach(function(task, index) {
-        if (task.id === taskId) {
-            existingTask = task;
-            taskIndex = index;
-        }
-    });
-
-    if (taskIndex === -1) {
-        return res.status(400).send('Task with id \'' + taskId + '\' doesn\'t exist.');
-    } else {
-        functionToPerform(tasks, taskIndex);
-    }
-
-    userTasks[userId] = tasks;
-    callback(existingTask);
-}
-
-function getUserTasks(userId) {
-    return userTasks[userId] || [];
-};
