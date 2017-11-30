@@ -57,9 +57,13 @@ app.get('/:userId/tasks', function(req, res) {
     const userId = req.params.userId;
 
     ensureUserExist(userId, res, function() {
-        const tasks = getUserTasks(userId);
-
-        return res.status(200).send(JSON.stringify({'tasks': tasks}));
+        Task.find({user: userId}, function (err, tasks) {
+            if (!err) {
+                res.status(200).send(JSON.stringify({'tasks': tasks}));
+            } else {
+                res.status(500).send(err);
+            }
+        });
     });
 });
 
@@ -121,11 +125,17 @@ function ensureValidTask(task, res, callback) {
 }
 
 function ensureUserExist(userId, res, callback) {
-    if (users.indexOf(userId) === -1) {
-        return res.status(400).send('User with id \'' + userId + '\' doesn\'t exist.');
-    }
-
-    callback();
+    User.find({id: userId}, function (err, users) {
+        if (!err) {
+            if (users) {
+                callback();
+            } else {
+                res.status(400).send('User with id \'' + userId + '\' doesn\'t exist.');
+            }
+        } else {
+           res.status(500).send(err);
+        }
+    });
 }
 
 function editTasks(userId, taskId, res, functionToPerform, callback) {
