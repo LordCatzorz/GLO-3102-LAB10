@@ -95,7 +95,6 @@ app.put('/:userId/tasks/:taskId', function(req, res) {
         ensureValidTask(req.body, res, function() {
             Task.find({id: taskId}, function (err, tasks) {
                 if (!err && tasks.length === 1) {
-                    // todo edit task
                     tasks[0].name = req.body.name;
                     tasks[0].save(function(err, task) {
                         if (!err) {
