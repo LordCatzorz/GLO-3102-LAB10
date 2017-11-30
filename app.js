@@ -93,10 +93,20 @@ app.put('/:userId/tasks/:taskId', function(req, res) {
 
     ensureUserExist(userId, res, function() {
         ensureValidTask(req.body, res, function() {
-            editTasks(userId, taskId, res, function(tasks, taskIndex){
-                tasks[taskIndex].name = req.body.name;
-            }, function(task) {
-                return res.status(200).send(JSON.stringify(task));
+            Task.find({id: taskId}, function (err, tasks) {
+                if (!err && tasks.length === 1) {
+                    // todo edit task
+                    tasks[0].name = req.body.name;
+                    tasks[0].save(function(err, task) {
+                        if (!err) {
+                            res.status(200).send(task.toDTO());
+                        } else {
+                            res.status(500).send(err);
+                        }
+                    })
+                } else {
+                    res.status(500).send(err);
+                }
             });
         });
     });
