@@ -116,10 +116,12 @@ app.delete('/:userId/tasks/:taskId', function(req, res) {
     const userId = req.params.userId;
 
     ensureUserExist(userId, res, function() {
-        editTasks(userId, taskId, res, function(tasks, taskIndex) {
-            tasks.splice(taskIndex, 1);
-        }, function() {
-            return res.sendStatus(204);
+        Task.deleteOne({id: taskId}, function (err) {
+            if (!err) {
+                res.sendStatus(204);
+            } else {
+                res.status(500).send(err);
+            }
         });
     });
 });
