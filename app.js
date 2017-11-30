@@ -18,7 +18,6 @@ const Task = require('./task.js').model;
 const port = process.env.PORT || 8080;
 const app = express();
 
-const users = [];
 const userTasks = {};
 
 app.use(bodyParser.json());
@@ -59,7 +58,7 @@ app.get('/:userId/tasks', function(req, res) {
     ensureUserExist(userId, res, function() {
         Task.find({user: userId}, function (err, tasks) {
             if (!err) {
-                res.status(200).send(JSON.stringify({'tasks': tasks}));
+                res.status(200).send(JSON.stringify({'tasks': tasks.map(t => t.toDTO())}));
             } else {
                 res.status(500).send(err);
             }
@@ -72,13 +71,17 @@ app.post('/:userId/tasks', function(req, res) {
 
     ensureUserExist(userId, res, function() {
         ensureValidTask(req.body, res, function() {
-            const task = {id: uuidv4(), name: req.body.name};
-            const tasks = getUserTasks(userId);
-            tasks.push(task);
 
-            userTasks[userId] = tasks;
+            const task = {id: uuidv4(), name: req.body.name, user: userId};
+            const dbTask = new Task(task);
 
-            return res.status(200).send(JSON.stringify(task));
+            dbTask.save(function(err, dbTask) {
+                if (!err) {
+                    res.status(200).send(dbTask.toDTO());
+                } else {
+                    res.status(500).send(err);
+                }
+            });
         });
     });
 

@@ -11,7 +11,6 @@ taskSchema.methods.toDTO = function() {
   const obj = this.toObject();
 
   const dto = {
-      user: obj.user,
       id: obj.id,
       name: obj.name
   };
